@@ -122,7 +122,7 @@ for message in st.session_state.messages:
 
 def get_response(user_input):
     # Usiamo il 7B: Intelligente ma leggero
-    repo_id = "Qwen/Qwen2.5-7B-Instruct" 
+    repo_id = "Qwen/Qwen2.5-1.5B-Instruct"
     
     if not api_token:
         return "⚠️ Errore: API Token Hugging Face mancante."

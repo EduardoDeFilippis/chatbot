@@ -122,7 +122,7 @@ for message in st.session_state.messages:
 
 # --- LOGICA LLM ---
 def get_response(user_input):
-    repo_id = "microsoft/Phi-3.5-mini-instruct"
+    repo_id = "HuggingFaceH4/zephyr-7b-beta"
     
     if not api_token:
         return "⚠️ Errore: API Token Hugging Face mancante."

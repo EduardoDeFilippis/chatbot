@@ -122,35 +122,35 @@ for message in st.session_state.messages:
 
 # --- LOGICA LLM ---
 def get_response(user_input):
-    repo_id = "google/gemma-2-2b-it"
+    # Torniamo al modello potente, ora che togliamo lo streaming non dovrebbe crashare
+    repo_id = "Qwen/Qwen2.5-72B-Instruct" 
     
     if not api_token:
         return "⚠️ Errore: API Token Hugging Face mancante."
 
-    # Inizializza il client usando la variabile corretta 'api_token'
     client = InferenceClient(model=repo_id, token=api_token)
 
-    # Costruiamo il prompt system + history
     messages_payload = [{"role": "system", "content": CONTEXT}]
     
-    # Aggiungiamo gli ultimi messaggi per la memoria (ultimi 6 per velocità e risparmio token)
     for msg in st.session_state.messages[-6:]:
         messages_payload.append({"role": msg["role"], "content": msg["content"]})
     
-    # Aggiungiamo il messaggio corrente se non è già l'ultimo (check sicurezza)
     if messages_payload[-1]["content"] != user_input:
          messages_payload.append({"role": "user", "content": user_input})
 
     try:
-        stream = client.chat_completion(
+        # CAMBIAMENTO CRUCIALE: stream=False
+        response = client.chat_completion(
             messages=messages_payload,
             max_tokens=500,
             temperature=0.7,
-            stream=True
+            stream=False 
         )
-        return stream
+        # Restituiamo direttamente il testo completo
+        return response.choices[0].message.content
+        
     except Exception as e:
-        return f"⚠️ Errore di connessione o Token non valido: {e}"
+        return f"⚠️ Errore di connessione: {e}"
 
 # --- GESTIONE INPUT ---
 if prompt := st.chat_input("Scrivi qui la tua domanda..."):
@@ -159,16 +159,11 @@ if prompt := st.chat_input("Scrivi qui la tua domanda..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # 2. Genera risposta
+    # 2. Genera risposta (MOSTRA SPINNER DI CARICAMENTO)
     with st.chat_message("assistant"):
-        stream_response = get_response(prompt)
-        
-        # Gestione del caso in cui get_response restituisca una stringa di errore invece di uno stream
-        if isinstance(stream_response, str):
-            st.error(stream_response)
-            response = stream_response
-        else:
-            response = st.write_stream(stream_response)
+        with st.spinner("Eduardo sta scrivendo..."):
+            response_text = get_response(prompt)
+            st.markdown(response_text) # Usa markdown invece di write_stream
     
     # 3. Salva risposta nella history
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    st.session_state.messages.append({"role": "assistant", "content": response_text})

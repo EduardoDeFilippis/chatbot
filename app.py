@@ -120,10 +120,9 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# --- LOGICA LLM ---
 def get_response(user_input):
-    # Torniamo al modello potente, ora che togliamo lo streaming non dovrebbe crashare
-    repo_id = "Qwen/Qwen2.5-72B-Instruct" 
+    # Usiamo il 7B: Intelligente ma leggero
+    repo_id = "Qwen/Qwen2.5-7B-Instruct" 
     
     if not api_token:
         return "⚠️ Errore: API Token Hugging Face mancante."
@@ -139,18 +138,17 @@ def get_response(user_input):
          messages_payload.append({"role": "user", "content": user_input})
 
     try:
-        # CAMBIAMENTO CRUCIALE: stream=False
+        # IMPORTANTE: stream=False
         response = client.chat_completion(
             messages=messages_payload,
             max_tokens=500,
             temperature=0.7,
             stream=False 
         )
-        # Restituiamo direttamente il testo completo
         return response.choices[0].message.content
         
     except Exception as e:
-        return f"⚠️ Errore di connessione: {e}"
+        return f"⚠️ Errore API: {e}"
 
 # --- GESTIONE INPUT ---
 if prompt := st.chat_input("Scrivi qui la tua domanda..."):

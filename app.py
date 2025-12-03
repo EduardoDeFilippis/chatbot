@@ -122,7 +122,7 @@ for message in st.session_state.messages:
 
 # --- LOGICA LLM ---
 def get_response(user_input):
-    repo_id = "Qwen/Qwen2.5-72B-Instruct" 
+    repo_id = "Qwen/Qwen2.5-7B-Instruct" 
     
     if not api_token:
         return "⚠️ Errore: API Token Hugging Face mancante."
